@@ -1,1 +1,1 @@
-# observability-workshop
+# observability-stack

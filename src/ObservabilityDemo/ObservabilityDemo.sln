@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{5C8BF0B8-9D23-4ABB-9913-300BE6E06D84}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migrator", "Migrator\Migrator.csproj", "{C596867F-417B-4A69-AC21-ED6F6E4C998C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Settings", "Shared\Settings\Settings.csproj", "{A73AFDBF-E22C-4A57-8224-637623EC720D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{C7DCA1B3-44E7-442E-9228-89422C7C3449}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C8BF0B8-9D23-4ABB-9913-300BE6E06D84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C8BF0B8-9D23-4ABB-9913-300BE6E06D84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C8BF0B8-9D23-4ABB-9913-300BE6E06D84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C8BF0B8-9D23-4ABB-9913-300BE6E06D84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C596867F-417B-4A69-AC21-ED6F6E4C998C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C596867F-417B-4A69-AC21-ED6F6E4C998C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C596867F-417B-4A69-AC21-ED6F6E4C998C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C596867F-417B-4A69-AC21-ED6F6E4C998C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A73AFDBF-E22C-4A57-8224-637623EC720D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A73AFDBF-E22C-4A57-8224-637623EC720D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A73AFDBF-E22C-4A57-8224-637623EC720D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A73AFDBF-E22C-4A57-8224-637623EC720D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A73AFDBF-E22C-4A57-8224-637623EC720D} = {C7DCA1B3-44E7-442E-9228-89422C7C3449}
+	EndGlobalSection
+EndGlobal

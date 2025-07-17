@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Migrator": {
+      "commandName": "Project",
+      "commandLineArgs": "up"
+    }
+  }
+}

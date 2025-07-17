@@ -1,0 +1,62 @@
+name: observability-stack
+
+services:
+  api:
+    container_name: observability-stack-api
+    hostname: api
+    build:
+      context: ../src/ObservabilityDemo
+      dockerfile: ./Api/Dockerfile
+    volumes:
+      - ../.config/api/appsettings.json:/app/appsettings.json
+    ports:
+      - "4500:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT
+      - ASPNETCORE_URLS
+    restart: unless-stopped
+
+  migrator:
+    container_name: observability-stack-migrator
+    hostname: migrator
+    build:
+      context: ../src/ObservabilityDemo
+      dockerfile: ./Migrator/Dockerfile
+    command: [ "up" ]
+    volumes:
+      - ../.config/migrator/appsettings.json:/app/appsettings.json
+    depends_on:
+      - db
+    restart: no
+
+  webui:
+    container_name: observability-stack-webui
+    hostname: webui
+    build:
+      context: ../src/ObservabilityDemo/WebUI
+      dockerfile: Dockerfile
+    volumes:
+      - ../.config/webui/appsettings.json:/usr/share/nginx/html/configuration/appsettings.json
+    ports:
+      - "4200:80"
+    restart: unless-stopped
+
+  db:
+    container_name: observability-stack-db
+    hostname: db
+    image: postgres:alpine@sha256:f325a29ec9deb7039c5f07761d77d79d537dac836ecd99f982f6ca5476724604
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  db-data:
+    driver: local
+    labels:
+      app: "db"
