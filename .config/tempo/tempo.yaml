@@ -36,6 +36,16 @@ metrics_generator:
   traces_storage:
     path: /var/tempo/generator/traces
 
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: traces
+      endpoint: minio:9000
+      access_key: admin
+      secret_key: jsQhEkRv6MEnKTwQVYs4
+      insecure: true
+
 overrides:
   metrics_generator_processors:
     [ service-graphs, span-metrics, local-blocks ]
