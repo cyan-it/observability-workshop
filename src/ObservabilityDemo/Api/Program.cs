@@ -1,7 +1,7 @@
-
 using Api.Extensions;
 using Api.Services.Delay;
 using Api.Services.Random;
+using Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -28,7 +28,10 @@ builder.Services.AddCors(options =>
 
 builder.Services
     .AddScoped<IRandomService, RandomService>()
-    .AddScoped<IDelayService, DelayService>();
+    .AddScoped<IDelayService, DelayService>()
+    .Configure<OpenTelemetrySettings>(builder.Configuration.GetSection(OpenTelemetrySettings.Section));
+
+builder.ConfigureOpenTelemetry();
 
 var app = builder.Build();
 app.UseCors();
