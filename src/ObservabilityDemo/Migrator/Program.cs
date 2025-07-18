@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Sinks.OpenTelemetry;
 using Settings;
 using System.Reflection;
 
@@ -55,13 +56,19 @@ internal class Program
 
     private static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((configurationBuilder) =>
+            .ConfigureAppConfiguration((ctx, cfg) =>
             {
-                configurationBuilder.SetBasePath(Directory.GetCurrentDirectory())
+                cfg.SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             })
             .ConfigureServices((hostBuilderContext, services) =>
             {
+                services.Configure<OpenTelemetrySettings>(
+                    hostBuilderContext.Configuration.GetSection(OpenTelemetrySettings.Section));
+
+                services.AddSingleton(serviceProvider =>
+                    serviceProvider.GetRequiredService<IOptions<OpenTelemetrySettings>>().Value);
+                
                 var previewOnly = args.Contains("--preview", StringComparer.OrdinalIgnoreCase);
                 services.AddFluentMigratorCore()
                     .ConfigureRunner(rb => rb
@@ -69,11 +76,27 @@ internal class Program
                         .WithGlobalConnectionString(
                             hostBuilderContext.Configuration.GetConnectionString("DefaultConnection"))
                         .ScanIn(Assembly.GetExecutingAssembly()).For.Migrations())
-                    .Configure<ProcessorOptions>(opt => opt.PreviewOnly = previewOnly);
+                    .Configure<ProcessorOptions>(options => options.PreviewOnly = previewOnly);
+                
+                var otelSettings = hostBuilderContext.Configuration
+                    .GetSection(OpenTelemetrySettings.Section)
+                    .Get<OpenTelemetrySettings>();
 
                 services.AddSerilog(configuration =>
                     configuration
                         .Enrich.FromLogContext()
-                        .WriteTo.Console());
+                        .WriteTo.Console()
+                        .WriteTo.OpenTelemetry(options =>
+                        {
+                            options.Endpoint = otelSettings!.Endpoint;
+                            options.Protocol = OtlpProtocol.HttpProtobuf;
+                            options.ResourceAttributes = new Dictionary<string, object>
+                            {
+                                ["service.name"] = otelSettings.ServiceName,
+                                ["service.version"] = otelSettings.ServiceVersion,
+                                ["service.environment"] = otelSettings.ServiceEnvironment,
+                                ["service.tenant"] = otelSettings.ServiceTenant
+                            };
+                        }));
             });
 }
