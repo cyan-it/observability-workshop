@@ -55,7 +55,101 @@ services:
       - "5432:5432"
     restart: unless-stopped
 
+  otelcol:
+    container_name: observability-stack-otelcol
+    hostname: otelcol
+    image: otel/opentelemetry-collector-contrib:0.126.0@sha256:973747f78266a8ffec428417727e6b704559e9a30e4be8c1cca2899facd68689
+    command: [ --config=/etc/otel-collector.yaml ]
+    volumes:
+      - ../.config/otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    restart: unless-stopped
+
+  loki:
+    container_name: observability-stack-loki
+    hostname: loki
+    image: grafana/loki:3.5.0@sha256:4c431d2e6b9b38718694b31c5d56be7c80dc69c513215fde1aeb5b02cd4e2665
+    command: [ "-config.file=/etc/loki/loki.yaml" ]
+    volumes:
+      - ../.config/loki/loki.yaml:/etc/loki/loki.yaml:ro
+    ports:
+      - "3100:3100"
+      - "9095:9095"
+    depends_on:
+      - minio
+    restart: unless-stopped
+
+  tempo:
+    container_name: observability-stack-tempo
+    hostname: tempo
+    image: grafana/tempo:2.7.2@sha256:4b0277a9b572a4b1fa43b01468e58911ec214dd69d033f2cd476596d14de9fe3
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ../.config/tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"
+    depends_on:
+      - minio
+    restart: unless-stopped
+
+  mimir-lb:
+    container_name: observability-stack-mimir-lb
+    hostname: mimir-lb
+    image: nginx:1-alpine3.19-otel@sha256:8faeb7a32d57e93cb7bd1fa46b49c58748e6d597cb0aa78d3367f611d2c89ddd
+    volumes:
+      - ../.config/mimir/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - mimir-1
+      - mimir-2
+    ports:
+      - "9009:9009"
+    restart: unless-stopped
+
+  mimir-1:
+    container_name: observability-stack-mimir-1
+    hostname: mimir-1
+    image: grafana/mimir:2.16.0@sha256:f5850c2fd0d872fc029378558765aa79c4be66a5fca0d8c6bf0fc30971484555
+    command: [ "-config.file=/etc/mimir/mimir.yaml" ]
+    volumes:
+      - ../.config/mimir/mimir.yaml:/etc/mimir/mimir.yaml
+    depends_on:
+      - minio
+    restart: unless-stopped
+
+  mimir-2:
+    container_name: observability-stack-mimir-2
+    hostname: mimir-2
+    image: grafana/mimir:2.16.0@sha256:f5850c2fd0d872fc029378558765aa79c4be66a5fca0d8c6bf0fc30971484555
+    command: [ "-config.file=/etc/mimir/mimir.yaml" ]
+    volumes:
+      - ../.config/mimir/mimir.yaml:/etc/mimir/mimir.yaml
+    depends_on:
+      - minio
+    restart: unless-stopped
+
+  minio:
+    container_name: observability-stack-minio
+    hostname: minio
+    image: docker.io/bitnami/minio:2025@sha256:d7cd0e172c4cc0870f4bdc3142018e2a37be9acf04d68f386600daad427e0cab
+    environment:
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+      - MINIO_DEFAULT_BUCKETS
+      - MINIO_SCHEME
+    volumes:
+      - minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+
 volumes:
+  minio-data:
+    driver: local
+    labels:
+      app: "minio"
   db-data:
     driver: local
     labels:
