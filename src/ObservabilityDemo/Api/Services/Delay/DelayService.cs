@@ -1,4 +1,6 @@
-﻿namespace Api.Services.Delay
+﻿using System.Diagnostics;
+
+namespace Api.Services.Delay
 {
     public class DelayService : IDelayService
     {
