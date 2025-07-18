@@ -1,0 +1,9 @@
+receivers:
+
+processors:
+
+exporters:
+
+services:
+  pipelines:
+    

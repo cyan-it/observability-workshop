@@ -1,0 +1,53 @@
+target: all
+
+common:
+  storage:
+    backend: s3
+    s3:
+      endpoint: minio:9000
+      insecure: true
+      bucket_name: metrics
+      access_key_id: admin
+      secret_access_key: jsQhEkRv6MEnKTwQVYs4
+
+blocks_storage:
+  storage_prefix: blocks
+  tsdb:
+    dir: /tmp/tsdb
+    block_ranges_period: [ 5m ]
+    head_compaction_interval: 30s
+    ship_interval: 1m
+    flush_blocks_on_shutdown: true
+    retention_period: 1h
+  bucket_store:
+    ignore_blocks_within: 5m
+    sync_interval: 1m
+    sync_dir: /tmp/tsdb-sync
+
+querier:
+  query_store_after: 10m
+
+memberlist:
+  join_members: [ mimir-1:7946, mimir-2:7946 ]
+
+limits:
+  compactor_blocks_retention_period: 672h
+
+server:
+  http_listen_port: 8080
+  grpc_listen_port: 9095
+
+activity_tracker:
+  filepath: /tmp/metrics-activity.log
+
+compactor:
+  data_dir: /tmp/data-compactor
+
+ruler:
+  rule_path: /tmp/data-ruler
+
+alertmanager:
+  data_dir: /tmp/data-alertmanager
+
+usage_stats:
+  enabled: false

@@ -1,0 +1,69 @@
+auth_enabled: false
+
+common:
+  path_prefix: /loki
+  replication_factor: 1
+  storage:
+    s3:
+      endpoint: minio:9000
+      insecure: true
+      bucketnames: logs
+      access_key_id: admin
+      secret_access_key: jsQhEkRv6MEnKTwQVYs4
+      s3forcepathstyle: true
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9095
+
+ingester:
+  chunk_idle_period: 30s
+  max_chunk_age: 5m
+  chunk_retain_period: 11m
+  wal:
+    enabled: true
+    dir: /tmp/loki/wal
+    flush_on_shutdown: true
+
+querier:
+  query_ingesters_within: 11m
+
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /tmp/loki/tsdb-shipper-active
+    cache_location: /tmp/loki/tsdb-shipper-cache
+    cache_ttl: 1h
+    resync_interval: 1m
+
+schema_config:
+  configs:
+    - from: 2023-01-01
+      store: tsdb
+      object_store: s3
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+compactor:
+  working_directory: /tmp/compactor
+  delete_request_store: s3
+  retention_enabled: true
+
+limits_config:
+  max_query_lookback: 672h # 28 days
+  retention_period: 672h   # 28 days
+  otlp_config:
+    resource_attributes:
+      ignore_defaults: true
+      attributes_config:
+        - action: index_label
+          regex: service.name
+    severity_text_as_label: true
+
+analytics:
+  reporting_enabled: false
