@@ -12,6 +12,16 @@ receivers:
             - http://*
             - https://*
 
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 8192
+
+  memory_limiter:
+    check_interval: 2s
+    limit_mib: 1000
+    spike_limit_mib: 200
+
 exporters:
   debug:
     verbosity: detailed
@@ -20,11 +30,29 @@ exporters:
     endpoint: http://loki:3100/otlp
     tls:
       insecure: true
+    queue:
+      enabled: true
+      num_consumers: 20
+      queue_size: 10000
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 10m
 
   otlphttp/tempo:
     endpoint: http://tempo:4318
     tls:
       insecure: true
+    queue:
+      enabled: true
+      num_consumers: 20
+      queue_size: 10000
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 10m
 
   prometheusremotewrite:
     endpoint: http://mimir-lb:9009/api/v1/push
@@ -35,10 +63,13 @@ service:
   pipelines:
     logs:
       receivers: [ otlp ]
+      processors: [ memory_limiter ]
       exporters: [ otlphttp/loki, debug ]
     traces:
       receivers: [ otlp ]
+      processors: [ memory_limiter, batch ]
       exporters: [ otlphttp/tempo ]
     metrics:
       receivers: [ otlp ]
+      processors: [ memory_limiter, batch ]
       exporters: [ prometheusremotewrite ]
