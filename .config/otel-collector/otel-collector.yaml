@@ -1,9 +1,44 @@
 receivers:
-
-processors:
+  otlp:
+    protocols:
+      grpc:
+        include_metadata: true
+        endpoint: 0.0.0.0:4317
+      http:
+        include_metadata: true
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - http://*
+            - https://*
 
 exporters:
+  debug:
+    verbosity: detailed
 
-services:
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
+
+  otlphttp/tempo:
+    endpoint: http://tempo:4318
+    tls:
+      insecure: true
+
+  prometheusremotewrite:
+    endpoint: http://mimir-lb:9009/api/v1/push
+    headers:
+      X-Scope-OrgID: grafana
+
+service:
   pipelines:
-    
+    logs:
+      receivers: [ otlp ]
+      exporters: [ otlphttp/loki, debug ]
+    traces:
+      receivers: [ otlp ]
+      exporters: [ otlphttp/tempo ]
+    metrics:
+      receivers: [ otlp ]
+      exporters: [ prometheusremotewrite ]
