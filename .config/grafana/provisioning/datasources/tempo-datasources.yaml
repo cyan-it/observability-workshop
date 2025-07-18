@@ -1,0 +1,37 @@
+apiVersion: 1
+
+datasources:
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    orgId: 1
+    url: http://tempo:3200
+    access: proxy
+    basicAuth: false
+    jsonData:
+      httpMethod: GET
+      serviceMap:
+        datasourceUid: 'mimir'
+      tracesToLogsV2:
+        datasourceUid: "loki"
+        spanStartTimeShift: "0h"
+        spanEndTimeShift: "2h"
+        filterByTraceID: false
+        filterBySpanID: false
+        customQuery: true
+        query: '{exporter="OTLP"} |="$${__span.traceId}"'
+      tracesToMetrics:
+        datasourceUid: "mimir"
+        spanStartTimeShift: "-5m"
+        spanEndTimeShift: "5m"
+        tags:
+          - key: "service.name"
+      nodeGraph:
+        enabled: true
+      traceQuery:
+        timeShiftEnabled: true
+        spanStartTimeShift: "0h"
+        spanEndTimeShift: "2h"
+      spanBar:
+        type: "Tag"
+        tag: "http.path"
