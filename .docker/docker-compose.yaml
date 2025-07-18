@@ -61,6 +61,7 @@ services:
     image: otel/opentelemetry-collector-contrib:0.126.0@sha256:973747f78266a8ffec428417727e6b704559e9a30e4be8c1cca2899facd68689
     command: [ --config=/etc/otel-collector.yaml ]
     volumes:
+      - ../.config/otel-collector/tmp/storage:/var/lib/otelcol/storage
       - ../.config/otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
     ports:
       - "4317:4317"
